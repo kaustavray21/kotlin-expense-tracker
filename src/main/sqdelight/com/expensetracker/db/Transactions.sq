@@ -1,0 +1,22 @@
+-- src/main/sqldelight/com/expensetracker/db/Transaction.sq
+
+CREATE TABLE `transaction` (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    category TEXT NOT NULL,
+    date TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM `transaction` ORDER BY date DESC;
+
+insert:
+INSERT OR REPLACE INTO `transaction`(id, title, amount, category, date)
+VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM `transaction` WHERE id = ?;
+
+calculateBalance:
+SELECT SUM(amount) FROM `transaction`;

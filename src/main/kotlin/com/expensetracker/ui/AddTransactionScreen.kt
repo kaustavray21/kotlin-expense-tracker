@@ -1,3 +1,4 @@
+// com/expensetracker/ui/AddTransactionScreen.kt
 package com.expensetracker.ui
 
 import androidx.compose.foundation.layout.*
@@ -6,14 +7,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.expensetracker.viewmodel.ExpenseViewModel
+import com.expensetracker.viewmodel.TransactionViewModel
 import java.math.BigDecimal
 
 @Composable
-fun AddExpenseScreen(
-    viewModel: ExpenseViewModel,
+fun AddTransactionScreen(
+    viewModel: TransactionViewModel,
+    isIncome: Boolean,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -21,12 +24,16 @@ fun AddExpenseScreen(
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
 
+    val screenTitle = if (isIncome) "Add New Income" else "Add New Expense"
+
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Add New Expense",
-            style = MaterialTheme.typography.headlineMedium
+            text = screenTitle,
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.White
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -67,18 +74,22 @@ fun AddExpenseScreen(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(onClick = onBack) {
+            TextButton(onClick = onBack) {
                 Text("Cancel")
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(onClick = {
                 val finalAmount = amount.toBigDecimalOrNull()
                 if (title.isNotBlank() && category.isNotBlank() && finalAmount != null && finalAmount > BigDecimal.ZERO) {
-                    viewModel.addExpense(title, finalAmount, category)
+                    if (isIncome) {
+                        viewModel.addIncome(title, finalAmount, category)
+                    } else {
+                        viewModel.addExpense(title, finalAmount, category)
+                    }
                     onBack()
                 }
             }) {
-                Text("Add Expense")
+                Text(if (isIncome) "Add Income" else "Add Expense")
             }
         }
     }

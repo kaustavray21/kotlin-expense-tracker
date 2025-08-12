@@ -1,3 +1,4 @@
+// com/expensetracker/ui/TransactionListScreen.kt
 package com.expensetracker.ui
 
 import androidx.compose.foundation.layout.*
@@ -11,34 +12,36 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.expensetracker.model.Expense
-import com.expensetracker.viewmodel.ExpenseViewModel
+import com.expensetracker.model.Transaction
+import com.expensetracker.viewmodel.TransactionViewModel
+import java.math.BigDecimal
 import java.util.UUID
 
 @Composable
-fun ExpenseListScreen(
-    viewModel: ExpenseViewModel,
+fun TransactionListScreen(
+    viewModel: TransactionViewModel,
     modifier: Modifier = Modifier
 ) {
-    val expenses by viewModel.expenses.collectAsState()
+    val transactions by viewModel.transactions.collectAsState()
 
-    if (expenses.isEmpty()) {
+    if (transactions.isEmpty()) {
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
-            Text("No expenses added yet. Tap '+' to add one!")
+            Text("No transactions added yet. Tap '+' to add one!")
         }
     } else {
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(expenses, key = { it.id }) { expense ->
-                ExpenseItem(
-                    expense = expense,
-                    onDeleteClick = viewModel::deleteExpense,
+            items(transactions, key = { it.id }) { transaction ->
+                TransactionItem(
+                    transaction = transaction,
+                    onDeleteClick = viewModel::deleteTransaction,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -47,11 +50,14 @@ fun ExpenseListScreen(
 }
 
 @Composable
-fun ExpenseItem(
-    expense: Expense,
+fun TransactionItem(
+    transaction: Transaction,
     onDeleteClick: (UUID) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val amountColor = if (transaction.amount >= BigDecimal.ZERO) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
+    val amountPrefix = if (transaction.amount >= BigDecimal.ZERO) "+" else ""
+
     Card(
         modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -62,24 +68,24 @@ fun ExpenseItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f).padding(vertical = 12.dp)) {
-                Text(text = expense.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = transaction.title, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = expense.category,
+                    text = transaction.category,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "₹${expense.amount.toPlainString()}",
+                    text = "$amountPrefix₹${transaction.amount.abs().toPlainString()}",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = amountColor,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                IconButton(onClick = { onDeleteClick(expense.id) }) {
+                IconButton(onClick = { onDeleteClick(transaction.id) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Expense",
+                        contentDescription = "Delete Transaction",
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
