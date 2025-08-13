@@ -1,4 +1,3 @@
-// com/expensetracker/ui/TransactionListScreen.kt
 package com.expensetracker.ui
 
 import androidx.compose.foundation.layout.*
@@ -12,36 +11,34 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.expensetracker.model.Transaction
-import com.expensetracker.viewmodel.TransactionViewModel
-import java.math.BigDecimal
+import com.expensetracker.model.Expense
+import com.expensetracker.viewmodel.ExpenseViewModel
 import java.util.UUID
 
 @Composable
-fun TransactionListScreen(
-    viewModel: TransactionViewModel,
+fun ExpenseListScreen(
+    viewModel: ExpenseViewModel,
     modifier: Modifier = Modifier
 ) {
-    val transactions by viewModel.transactions.collectAsState()
+    val expenses by viewModel.expenses.collectAsState()
 
-    if (transactions.isEmpty()) {
+    if (expenses.isEmpty()) {
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
-            Text("No transactions added yet. Tap '+' to add one!")
+            Text("No expenses added yet. Tap '+' to add one!")
         }
     } else {
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(transactions, key = { it.id }) { transaction ->
-                TransactionItem(
-                    transaction = transaction,
-                    onDeleteClick = viewModel::deleteTransaction,
+            items(expenses, key = { it.id }) { expense ->
+                ExpenseItem(
+                    expense = expense,
+                    onDeleteClick = viewModel::deleteExpense,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -50,14 +47,11 @@ fun TransactionListScreen(
 }
 
 @Composable
-fun TransactionItem(
-    transaction: Transaction,
+fun ExpenseItem(
+    expense: Expense,
     onDeleteClick: (UUID) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val amountColor = if (transaction.amount >= BigDecimal.ZERO) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
-    val amountPrefix = if (transaction.amount >= BigDecimal.ZERO) "+" else ""
-
     Card(
         modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -68,24 +62,24 @@ fun TransactionItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f).padding(vertical = 12.dp)) {
-                Text(text = transaction.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = expense.title, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = transaction.category,
+                    text = expense.category,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "$amountPrefix₹${transaction.amount.abs().toPlainString()}",
+                    text = "₹${expense.amount.toPlainString()}",
                     style = MaterialTheme.typography.titleLarge,
-                    color = amountColor,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                IconButton(onClick = { onDeleteClick(transaction.id) }) {
+                IconButton(onClick = { onDeleteClick(expense.id) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Transaction",
+                        contentDescription = "Delete Expense",
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
